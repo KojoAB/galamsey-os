@@ -1,6 +1,8 @@
 -- Galamsey Watch — Milestones 2–12: notifications, review workflow, tips, storage,
 -- stats, public map, connectors, paid-data controls.
 
+set search_path = public, extensions;
+
 -- ---------------------------------------------------------------------------
 -- Extra columns
 -- ---------------------------------------------------------------------------
@@ -101,7 +103,7 @@ create table tip_rate (
 alter table tip_rate enable row level security;   -- no policies: service role only
 
 create or replace function tip_rate_hit(p_hash text, p_limit integer)
-returns boolean language plpgsql security definer set search_path = public as $$
+returns boolean language plpgsql security definer set search_path = public, extensions as $$
 declare c integer;
 begin
   insert into tip_rate (phone_hash, hour, count) values (p_hash, date_trunc('hour', now()), 1)
@@ -114,7 +116,7 @@ revoke execute on function tip_rate_hit(text, integer) from public, anon, authen
 
 -- Link a tip to the nearest alert within 2 km, else leave it as a tip-only item.
 create or replace function link_tip(p_tip bigint)
-returns bigint language plpgsql security definer set search_path = public as $$
+returns bigint language plpgsql security definer set search_path = public, extensions as $$
 declare a bigint;
 begin
   select al.id into a
@@ -135,7 +137,7 @@ revoke execute on function link_tip(bigint) from public, anon, authenticated;
 -- stores the decision as a training label (M8).
 -- ---------------------------------------------------------------------------
 create or replace function review_alert(p_alert bigint, p_decision review_decision, p_notes text)
-returns alert_status language plpgsql security invoker set search_path = public as $$
+returns alert_status language plpgsql security invoker set search_path = public, extensions as $$
 declare cur alert_status;
 begin
   if not is_staff() then raise exception 'Only analysts and admins can review alerts'; end if;
@@ -177,7 +179,7 @@ create or replace function alerts_geojson(
   p_from date default current_date - 30, p_to date default current_date,
   p_levels alert_level[] default null, p_statuses alert_status[] default null,
   p_region text default null, p_source text default null)
-returns json language sql stable security invoker set search_path = public as $$
+returns json language sql stable security invoker set search_path = public, extensions as $$
   select json_build_object('type', 'FeatureCollection', 'features', coalesce(json_agg(json_build_object(
     'type', 'Feature', 'id', id,
     'geometry', st_asgeojson(geom, 6)::json,
@@ -194,7 +196,7 @@ returns json language sql stable security invoker set search_path = public as $$
 $$;
 
 create or replace function tips_geojson()
-returns json language sql stable security invoker set search_path = public as $$
+returns json language sql stable security invoker set search_path = public, extensions as $$
   select json_build_object('type', 'FeatureCollection', 'features', coalesce(json_agg(json_build_object(
     'type', 'Feature', 'id', id, 'geometry', st_asgeojson(geom, 5)::json,
     'properties', json_build_object('id', id, 'reference_code', reference_code, 'status', status,
@@ -244,7 +246,7 @@ grant select on stats_weekly_hectares, stats_accuracy, stats_rivers, stats_respo
 -- security definer so signed-out visitors can call it without table access.
 -- ---------------------------------------------------------------------------
 create or replace function public_sites_geojson()
-returns json language sql stable security definer set search_path = public as $$
+returns json language sql stable security definer set search_path = public, extensions as $$
   select json_build_object('type', 'FeatureCollection', 'features', coalesce(json_agg(json_build_object(
     'type', 'Feature',
     'geometry', st_asgeojson(st_simplifypreservetopology(geom, 0.0001), 5)::json,
@@ -269,13 +271,13 @@ insert into storage.buckets (id, name, public) values
 on conflict (id) do nothing;
 
 create policy chips_read on storage.objects for select
-  using (bucket_id = 'chips' and app_role() is not null);
+  using (bucket_id = 'chips' and public.app_role() is not null);
 create policy field_photos_read on storage.objects for select
-  using (bucket_id = 'field-photos' and (is_staff() or (storage.foldername(name))[1] = auth.uid()::text));
+  using (bucket_id = 'field-photos' and (public.is_staff() or (storage.foldername(name))[1] = auth.uid()::text));
 create policy field_photos_insert on storage.objects for insert
   with check (bucket_id = 'field-photos' and (storage.foldername(name))[1] = auth.uid()::text);
 create policy tips_media_read on storage.objects for select
-  using (bucket_id = 'tips' and is_staff());
+  using (bucket_id = 'tips' and public.is_staff());
 
 -- ---------------------------------------------------------------------------
 -- Default connector rows (all off until an agency agreement is in place)
@@ -300,13 +302,13 @@ on conflict (key) do nothing;
 -- Labelling tool (M8)
 -- ---------------------------------------------------------------------------
 create or replace function add_label(p_geojson text, p_label text, p_image_date date)
-returns bigint language sql security invoker set search_path = public as $$
+returns bigint language sql security invoker set search_path = public, extensions as $$
   insert into labels (geom, label, image_date, created_by)
   values (st_setsrid(st_geomfromgeojson(p_geojson), 4326), p_label, p_image_date, auth.uid())
   returning id
 $$;
 create or replace function labels_geojson()
-returns json language sql stable security invoker set search_path = public as $$
+returns json language sql stable security invoker set search_path = public, extensions as $$
   select json_build_object('type', 'FeatureCollection', 'features', coalesce(json_agg(json_build_object(
     'type', 'Feature', 'id', id, 'geometry', st_asgeojson(geom, 6)::json,
     'properties', json_build_object('id', id, 'label', label, 'image_date', image_date, 'from_review', alert_id is not null)
@@ -321,7 +323,7 @@ create policy profiles_staff_read on profiles for select using (is_staff());
 -- Draft a high-resolution tasking request (M12). Creates a row only; nothing is ordered
 -- until an admin approves it and someone submits it to the provider.
 create or replace function draft_tasking(p_alert bigint, p_priority text, p_user uuid)
-returns bigint language sql security invoker set search_path = public as $$
+returns bigint language sql security invoker set search_path = public, extensions as $$
   insert into tasking_requests (alert_id, aoi, priority, requested_by)
   select id, st_envelope(st_buffer(geom::geography, 500)::geometry), p_priority, auth.uid()
   from alerts where id = p_alert and level = 'red' and p_user = auth.uid()
@@ -333,7 +335,7 @@ grant execute on function draft_tasking(bigint, text, uuid) to authenticated;
 alter table field_reports add column client_id uuid unique;
 create or replace function add_field_report(p_client_id uuid, p_alert bigint, p_photos text[], p_notes text,
                                             p_lon float8, p_lat float8, p_visited_at timestamptz)
-returns bigint language sql security invoker set search_path = public as $$
+returns bigint language sql security invoker set search_path = public, extensions as $$
   insert into field_reports (client_id, alert_id, user_id, photos, notes, geom, visited_at)
   values (p_client_id, p_alert, auth.uid(), coalesce(p_photos, '{}'), left(p_notes, 4000),
           case when p_lon is null then null else st_setsrid(st_makepoint(p_lon, p_lat), 4326) end, p_visited_at)
@@ -344,7 +346,7 @@ grant execute on function add_field_report(uuid, bigint, text[], text, float8, f
 
 -- Evidence pack context (M9): area growth over time and what is nearby.
 create or replace function evidence_context(p_alert bigint)
-returns json language sql stable security invoker set search_path = public as $$
+returns json language sql stable security invoker set search_path = public, extensions as $$
   with a as (select * from alerts where id = p_alert),
   det as (select d.* from detections d join alert_sources s on s.detection_id = d.id where s.alert_id = p_alert),
   growth as (
@@ -364,3 +366,7 @@ returns json language sql stable security invoker set search_path = public as $$
     'outline', (select st_asgeojson(st_simplifypreservetopology(geom, 0.02), 3)::json from reference_layers where type = 'admin0' limit 1))
 $$;
 grant execute on function evidence_context(bigint) to authenticated;
+
+-- Signed-out visitors get no table access at all; only public_sites_geojson().
+revoke all on recipients, water_quality_readings, tasking_requests, paid_spend, tip_rate from anon;
+revoke insert, update, delete on water_quality_readings, paid_spend from authenticated;

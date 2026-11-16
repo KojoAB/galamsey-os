@@ -5,7 +5,7 @@
 -- tolerance is in degrees (0.0005 ≈ 55 m) — enough for a national map.
 create or replace function layer_geojson(layer reference_layer_type, tolerance float8 default 0.0005)
 returns json
-language sql stable security invoker set search_path = public as $$
+language sql stable security invoker set search_path = public, extensions as $$
   select json_build_object(
     'type', 'FeatureCollection',
     'features', coalesce(json_agg(json_build_object(
@@ -22,7 +22,7 @@ $$;
 
 create or replace function tiles_geojson()
 returns json
-language sql stable security invoker set search_path = public as $$
+language sql stable security invoker set search_path = public, extensions as $$
   select json_build_object(
     'type', 'FeatureCollection',
     'features', coalesce(json_agg(json_build_object(
@@ -45,7 +45,7 @@ create or replace view reference_layer_summary with (security_invoker = true) as
 -- only after the new batch is fully inserted. Service role only.
 create or replace function swap_reference_batch(layer reference_layer_type, new_batch uuid)
 returns integer
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare removed integer;
 begin
   delete from reference_layers where type = layer and batch_id <> new_batch;
@@ -57,7 +57,7 @@ revoke execute on function swap_reference_batch(reference_layer_type, uuid) from
 -- Tag each tile with its region and set priority = high where it touches a priority zone.
 create or replace function refresh_tile_attributes()
 returns void
-language sql security definer set search_path = public as $$
+language sql security definer set search_path = public, extensions as $$
   -- Region = the ADM1 polygon covering most of the tile (tiles on a border touch two).
   update tiles t set region = (
     select r.name from reference_layers r

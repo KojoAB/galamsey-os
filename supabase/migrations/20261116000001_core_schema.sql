@@ -2,8 +2,8 @@
 -- All geometries are stored in WGS84 (EPSG:4326). Metric work (areas, buffers,
 -- distances) is done in UTM zone 30N (EPSG:32630), which covers Ghana well.
 
-create extension if not exists postgis;
-create extension if not exists pgcrypto;
+create extension if not exists postgis with schema extensions;   -- Supabase keeps extensions out of public
+create extension if not exists pgcrypto with schema extensions;
 
 -- ---------------------------------------------------------------------------
 -- Enums

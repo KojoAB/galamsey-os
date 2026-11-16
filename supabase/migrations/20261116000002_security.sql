@@ -6,25 +6,25 @@
 -- Helpers (security definer so policies can read profiles without recursion)
 -- ---------------------------------------------------------------------------
 create or replace function app_role() returns user_role
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select role from profiles where user_id = auth.uid()
 $$;
 
 create or replace function app_regions() returns text[]
-language sql stable security definer set search_path = public as $$
+language sql stable security definer set search_path = public, extensions as $$
   select coalesce(regions, '{}') from profiles where user_id = auth.uid()
 $$;
 
 create or replace function is_staff() returns boolean
-language sql stable as $$ select app_role() in ('admin', 'analyst') $$;
+language sql stable set search_path = public as $$ select app_role() in ('admin', 'analyst') $$;
 
 create or replace function is_admin() returns boolean
-language sql stable as $$ select app_role() = 'admin' $$;
+language sql stable set search_path = public as $$ select app_role() = 'admin' $$;
 
 -- New sign-ups get a profile with the lowest role and no regions.
 -- An admin must promote them. Nobody can self-promote (see profiles policies).
 create or replace function handle_new_user() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 begin
   insert into profiles (user_id, full_name) values (new.id, new.raw_user_meta_data->>'full_name');
   return new;
@@ -115,7 +115,7 @@ create policy settings_admin      on settings            for update using (is_ad
 -- (rejected may also close; confirmed may close without a field visit)
 -- ---------------------------------------------------------------------------
 create or replace function enforce_alert_status() returns trigger
-language plpgsql security definer set search_path = public as $$
+language plpgsql security definer set search_path = public, extensions as $$
 declare
   allowed boolean;
 begin
