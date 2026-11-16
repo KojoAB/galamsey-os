@@ -1,0 +1,5 @@
+[
+  {"device_id": "MOCK-EX-001", "lon": -0.585, "lat": 6.215, "recorded_at": "2026-11-15T09:30:00Z"},
+  {"device_id": "MOCK-EX-002", "lon": -1.795, "lat": 6.255, "recorded_at": "2026-11-15T11:10:00Z"},
+  {"device_id": "MOCK-EX-003", "lon": -2.000, "lat": 5.300, "recorded_at": "2026-11-15T14:45:00Z"}
+]

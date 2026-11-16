@@ -13,3 +13,22 @@ the layer may appear on a **public** map.
 
 Excavator GPS tracking, CERSGIS detections and NAIMOS outcomes are Milestone 10 connectors and
 will get their own request list then.
+
+## Live connectors (Milestone 10)
+
+Each connector is built and tested on mock data (`pipeline/galamsey/connectors/mock/`). To switch one
+to real data, set `<ID>_URL` (and `<ID>_TOKEN` if needed) and remove `<ID>_MOCK`. The admin panel's
+*Data sources* tab shows each one as connected, stale or off.
+
+| Connector id | Agency | What to request | Format we expect (one record) |
+|---|---|---|---|
+| `minerals_commission_cadastre` | Minerals Commission | Read-only API or nightly export of the mining cadastre | GeoJSON Feature, properties `licence_no, holder, status (active/expired/suspended), licence_type, expires` |
+| `minerals_commission_equipment` | Minerals Commission | Read-only API to the excavator/equipment GPS tracking system, positions since a timestamp | `{device_id, lon, lat, recorded_at (ISO 8601)}` |
+| `forestry_commission_mining` | Forestry Commission (RMSC) | Their mapped mining-damage polygons, updated monthly | GeoJSON Feature, properties `id, date, confidence (0–1)` |
+| `cersgis_nrt` | CERSGIS | Their near-real-time mining detections | Same as Forestry Commission |
+| `naimos` | NAIMOS | Two-way: an endpoint to receive our confirmed alerts (`POST /alerts`) and a feed of operation outcomes | Outcome: `{alert_id, action (raided/closed/reclaimed/arrests), action_date, notes}` |
+| `wrc_water_quality` | Water Resources Commission | Station list and turbidity readings | `{station_id, station_name, lon, lat, measured_at, turbidity_ntu}` |
+
+Credentials to ask for: a service account (not a person's login), read-only scope, an API token we
+can rotate, and an IP allow-list exception for GitHub Actions if they use one. Agency data stays off
+the public map unless the agency agrees in writing (`connectors.public_allowed`).

@@ -22,7 +22,7 @@ export async function proxy(request: NextRequest) {
 
   const { data } = await supabase.auth.getClaims();
   const path = request.nextUrl.pathname;
-  const isPublic = path.startsWith("/login") || path.startsWith("/auth");
+  const isPublic = path.startsWith("/login") || path.startsWith("/auth") || path.startsWith("/public") || path.startsWith("/api/whatsapp");
   if (!data?.claims && !isPublic) {
     const url = request.nextUrl.clone();
     url.pathname = "/login";
@@ -32,5 +32,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|demo/|.*\\.(?:png|svg|jpg|geojson)$).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|demo/|sw.js|maplibre-gl-worker.mjs|.*\\.(?:png|svg|jpg|geojson)$).*)"],
 };

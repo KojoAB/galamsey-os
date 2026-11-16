@@ -3,7 +3,7 @@
 
 export type LayerKey =
   | "admin1" | "admin2" | "forest_reserve" | "river" | "river_buffer_100m"
-  | "river_buffer_500m" | "concession" | "priority_zone" | "tiles";
+  | "river_buffer_500m" | "concession" | "priority_zone" | "tiles" | "tips";
 
 export type LayerDef = {
   key: LayerKey;
@@ -11,6 +11,7 @@ export type LayerDef = {
   hint: string;
   swatch: string;
   defaultOn: boolean;
+  staffOnly?: boolean;
   kind: "line" | "fill";
   color: string;
   fillOpacity?: number;
@@ -19,6 +20,7 @@ export type LayerDef = {
 };
 
 export const LAYERS: LayerDef[] = [
+  { key: "tips", label: "Public tips", hint: "Tip-line reports with a location", swatch: "#f472b6", defaultOn: false, kind: "line", color: "#f472b6", staffOnly: true },
   { key: "priority_zone", label: "Mining-belt priority zones", hint: "Processed first, every day", swatch: "#22d3ee", defaultOn: true, kind: "line", color: "#22d3ee", dashed: true, width: 2 },
   { key: "forest_reserve", label: "Forest reserves", hint: "Protected forest", swatch: "#3fb588", defaultOn: true, kind: "fill", color: "#3fb588", fillOpacity: 0.22, width: 1 },
   { key: "river_buffer_500m", label: "River buffer 500 m", hint: "Major rivers", swatch: "#60a5fa", defaultOn: false, kind: "fill", color: "#60a5fa", fillOpacity: 0.12 },

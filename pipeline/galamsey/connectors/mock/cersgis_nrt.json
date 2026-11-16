@@ -1,0 +1,2 @@
+[{"type": "Feature", "properties": {"id": "MOCK-CG-1", "date": "2026-11-12", "confidence": 0.75},
+  "geometry": {"type": "Polygon", "coordinates": [[[-1.800,6.250],[-1.796,6.250],[-1.796,6.254],[-1.800,6.254],[-1.800,6.250]]]}}]
