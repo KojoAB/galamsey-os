@@ -1,0 +1,68 @@
+# Galamsey Watch — editable reference configuration.
+# Change these lists, then re-run:  python -m galamsey.ingest_reference priority-zones   (or: all)
+
+# Major rivers to buffer (100 m and 500 m). Names are matched against the river layer,
+# with or without the word "River". Add tributaries as you confirm their names in the data.
+major_rivers:
+  - Pra
+  - Ankobra
+  - Offin
+  - Birim
+  - Tano
+  - Densu
+  - Oda
+  - Anum
+  - Ofin
+  - Butre
+  - Bonsa
+  - Huni
+  - Subri
+  - Kwanyako
+
+# Starting hotspot districts for the mining-belt priority layer, grouped by region.
+# Matching is case-insensitive and ignores "Municipal"/"District". Any name not found in the
+# boundary data is reported after the run so you can fix the spelling here.
+priority_districts:
+  Western:
+    - Prestea-Huni Valley
+    - Tarkwa-Nsuaem
+    - Wassa East
+    - Wassa Amenfi East
+    - Wassa Amenfi West
+    - Wassa Amenfi Central
+    - Mpohor
+    - Ellembelle
+  Western North:
+    - Bibiani-Anhwiaso-Bekwai
+    - Sefwi Wiawso
+    - Aowin
+    - Juaboso
+    - Bia West
+  Ashanti:
+    - Amansie West
+    - Amansie Central
+    - Amansie South
+    - Obuasi
+    - Obuasi East
+    - Adansi North
+    - Adansi South
+    - Bekwai
+    - Atwima Mponua
+    - Ahafo Ano South West
+    - Bosome Freho
+  Eastern:
+    - East Akim
+    - Atiwa West
+    - Atiwa East
+    - Kwaebibirem
+    - Denkyembour
+    - Fanteakwa North
+    - Birim North
+    - Birim Central
+  Central:
+    - Upper Denkyira East
+    - Upper Denkyira West
+    - Twifo Atti-Morkwa
+    - Twifo Hemang Lower Denkyira
+    - Assin North
+    - Assin South

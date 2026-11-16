@@ -1,0 +1,8 @@
+{"elements":[
+ {"type":"way","id":1,"tags":{"waterway":"river","name":"Birim River"},"geometry":[{"lat":6.20,"lon":-0.90},{"lat":6.10,"lon":-0.95},{"lat":6.00,"lon":-1.00}]},
+ {"type":"way","id":2,"tags":{"waterway":"river","name":"Birim"},"geometry":[{"lat":6.00,"lon":-1.00},{"lat":5.90,"lon":-1.05}]},
+ {"type":"way","id":3,"tags":{"waterway":"river","name":"Offin River"},"geometry":[{"lat":6.30,"lon":-1.80},{"lat":6.20,"lon":-1.70}]},
+ {"type":"way","id":4,"tags":{"waterway":"stream","name":"Unrelated Stream"},"geometry":[{"lat":7.0,"lon":-1.0},{"lat":7.1,"lon":-1.1}]},
+ {"type":"node","id":5,"lat":6.0,"lon":-1.0},
+ {"type":"way","id":6,"tags":{"waterway":"river"},"geometry":[{"lat":6.0,"lon":-1.0}]}
+]}

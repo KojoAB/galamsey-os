@@ -1,0 +1,1 @@
+"""Galamsey Watch processing pipeline."""

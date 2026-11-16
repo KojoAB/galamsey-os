@@ -1,0 +1,30 @@
+name: Reference data refresh
+# Monthly, 1st of the month 03:17 GMT, and on demand from the Actions tab.
+on:
+  schedule:
+    - cron: "17 3 1 * *"
+  workflow_dispatch:
+    inputs:
+      step:
+        description: "all | boundaries | forests | rivers | concessions | priority-zones | grid"
+        default: all
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults: { run: { working-directory: pipeline } }
+    env:
+      SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+      PROTECTED_PLANET_API_TOKEN: ${{ secrets.PROTECTED_PLANET_API_TOKEN }}
+      GSS_BOUNDARIES_ADM1_URL: ${{ secrets.GSS_BOUNDARIES_ADM1_URL }}
+      GSS_BOUNDARIES_ADM2_URL: ${{ secrets.GSS_BOUNDARIES_ADM2_URL }}
+      FORESTRY_COMMISSION_RESERVES_URL: ${{ secrets.FORESTRY_COMMISSION_RESERVES_URL }}
+      WRC_RIVERS_URL: ${{ secrets.WRC_RIVERS_URL }}
+      MINERALS_COMMISSION_CADASTRE_URL: ${{ secrets.MINERALS_COMMISSION_CADASTRE_URL }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.11", cache: pip, cache-dependency-path: pipeline/requirements.txt }
+      - run: pip install -r requirements.txt
+      - run: python -m galamsey.ingest_reference ${{ github.event.inputs.step || 'all' }}

@@ -1,0 +1,10 @@
+# Galamsey Watch pipeline — Python 3.11+
+geopandas>=1.0
+shapely>=2.0
+pyproj>=3.6
+pyogrio>=0.9
+psycopg[binary]>=3.2
+requests>=2.32
+pyyaml>=6.0
+osm2geojson>=0.2.5
+# Added in later milestones: earthengine-api, pystac-client, rasterio, numpy, scikit-image
