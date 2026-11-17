@@ -12,7 +12,9 @@ on:
         description: "detect | notify | weekly | connectors"
         default: detect
 
-concurrency: { group: daily-${{ github.event.schedule || github.event.inputs.job }}, cancel-in-progress: false }
+concurrency:
+  group: daily-${{ github.event.schedule || github.event.inputs.job }}
+  cancel-in-progress: false
 
 jobs:
   run:
