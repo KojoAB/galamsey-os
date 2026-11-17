@@ -24,7 +24,7 @@ def alert_line(a: dict) -> str:
         river = a["river_name"] if a["river_name"].lower().endswith("river") else f"{a['river_name']} River"
         parts.append(f"{int(a['river_distance_m'])} m from {river}")
     parts.append(f"Score {a['score']}")
-    parts.append(f"View: {app_url(f'/alerts/{a['id']}')}")
+    parts.append(f"View: {app_url('/alerts/' + str(a['id']))}")
     return " | ".join(parts)
 
 
@@ -36,7 +36,7 @@ def daily_email(alerts: list[dict], day: str, map_cid: str | None = None) -> tup
     text = "\n".join([subject, ""] + [alert_line(a) for a in alerts] +
                      ["", "Every alert must be reviewed before it is treated as fact."])
     rows = "".join(
-        f"<tr><td>{ICON.get(a['level'], '')} {a['level'].title()}</td><td><a href=\"{app_url(f'/alerts/{a['id']}')}\">#{a['id']}</a></td>"
+        f"<tr><td>{ICON.get(a['level'], '')} {a['level'].title()}</td><td><a href=\"{app_url('/alerts/' + str(a['id']))}\">#{a['id']}</a></td>"
         f"<td>{float(a['area_ha']):.1f}</td><td>{html.escape(a.get('district') or '')}, {html.escape(a.get('region') or '')}</td>"
         f"<td>{html.escape(a.get('forest_reserve_name') or '—')}</td>"
         f"<td>{'' if a.get('river_distance_m') is None else str(a['river_distance_m']) + ' m'}</td><td><b>{a['score']}</b></td></tr>"
